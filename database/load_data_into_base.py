@@ -16,11 +16,11 @@ from dictionaries.paths_dict import *
 #     }
 #     ...
 # }
-def get_mapped_line(line, dictionary_year, first_line):
+def get_mapped_line(line, dictionary, first_line):
     mapped_line = {}
     for index in range(len(first_line)):
-        if first_line[index] in dictionary_year:
-            (table, field) = dictionary_year[first_line[index]]
+        if first_line[index] in dictionary:
+            (table, field) = dictionary[first_line[index]]
             if table not in mapped_line:
                 mapped_line[table] = {"fields": [], "values": []}
             treated_data = treat_data(table, field, line[index])
@@ -36,8 +36,8 @@ def get_mapped_line(line, dictionary_year, first_line):
 memoized_dimensions_ids = {}
 
 
-def load_line(first_line, line, year, sql_connection):
-    mapped_line = get_mapped_line(line, dictionary_column_mapping[year], first_line)
+def load_line(sql_connection, first_line, line):
+    mapped_line = get_mapped_line(line, dictionary_column_mapping, first_line)
     if mapped_line is None:
         return False
     participacao_values = {
@@ -56,8 +56,9 @@ def load_line(first_line, line, year, sql_connection):
         participacao_values["values"].append(memoized_dimensions_ids[f"{table}-{string_values}"])
     fields_string = '`,`'.join(participacao_values['fields'])
     values_insertions = ','.join(['?' for _ in participacao_values["values"]])
-    query = f"insert into `participacao` (`{fields_string}`) values ({values_insertions})"
-    sql_connection.execute(query, participacao_values["values"])
+    participacao_values2 = participacao_values["values"] + [line[3]]
+    query = f"insert into `registro` (`{fields_string}`,`data`) values ({values_insertions},?)"
+    sql_connection.execute(query, participacao_values2)
     return True
 
 
@@ -67,7 +68,7 @@ def load_data(connection, filepath):
     first_line = None
     count = 0
     for line in data_table:
-        splitted_line = line.split(';')
+        splitted_line = line.strip().split(',')
         if first:
             first_line = splitted_line
             first = False

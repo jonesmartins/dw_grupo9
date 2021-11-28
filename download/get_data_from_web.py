@@ -1,12 +1,10 @@
 import errno
 import os
+
 import requests
-import zipfile
+
 from dictionaries.paths_dict import (
-    curr_dir,
-    data_root_path,
     source_data_root_path,
-    database_root_path,
     urls,
 )
 
