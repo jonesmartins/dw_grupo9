@@ -1,7 +1,5 @@
-import sqlite3
 from dictionaries.load_data_dict import dictionary_column_mapping
 from database.treat_data import treat_data
-from dictionaries.paths_dict import *
 
 
 # The Function 'get_mapped_line' extracts values from csv line and return these values mapped to the following format
